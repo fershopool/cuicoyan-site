@@ -1,4 +1,3 @@
-import './styles/app.css';
 import { el, $, announce } from './utils/dom.js';
 import { routeForPath, routes } from './config/routes.js';
 import { readUrlState, goWithState } from './utils/url-state.js';
@@ -10,6 +9,11 @@ import { getJoinChannel, getContactChannel } from './services/external-channel.s
 import { renderShell, renderFooter } from './components/shell.js';
 import { eventCard, artistCard, venueCard } from './components/cards.js';
 import { mapView } from './components/map.js';
+
+const stylesheet = document.createElement('link');
+stylesheet.rel = 'stylesheet';
+stylesheet.href = new URL('./styles/app.css', import.meta.url);
+document.head.append(stylesheet);
 
 const events = getEvents();
 const artists = getArtists();
