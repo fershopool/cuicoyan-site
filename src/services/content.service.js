@@ -1,0 +1,20 @@
+import events from '../data/events.json' with { type: 'json' };
+import artists from '../data/artists.json' with { type: 'json' };
+import venues from '../data/venues.json' with { type: 'json' };
+import categories from '../data/categories.json' with { type: 'json' };
+import convocatorias from '../data/convocatorias.json' with { type: 'json' };
+import help from '../data/help.json' with { type: 'json' };
+import { isVisible } from '../config/content-status.js';
+
+const visible = (items) => items.filter(isVisible);
+export const getEvents = () => visible(events);
+export const getArtists = () => visible(artists);
+export const getVenues = () => visible(venues);
+export const getCategories = () => categories;
+export const getCalls = () => visible(convocatorias);
+export const getHelp = () => visible(help);
+export const getEvent = (slug) => getEvents().find((item) => item.slug === slug);
+export const getArtist = (slug) => getArtists().find((item) => item.slug === slug);
+export const getVenue = (slug) => getVenues().find((item) => item.slug === slug);
+export const getVenueById = (id) => getVenues().find((item) => item.id === id);
+export const getArtistById = (id) => getArtists().find((item) => item.id === id);

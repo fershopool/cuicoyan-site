@@ -1,0 +1,4 @@
+[
+  {"id":"call-demo-1","title":"Convocatoria de demostración","description":"Este contenido ilustra cómo se vería una oportunidad cultural antes de validar fechas y responsable.","status":"Próximamente","contentStatus":"demo","isDemo":true,"source":"mockup-convocatorias"},
+  {"id":"call-demo-2","title":"Residencia cultural por confirmar","description":"Sin postulación activa. La información se habilitará cuando exista un canal aprobado.","status":"Por confirmar","contentStatus":"demo","isDemo":true,"source":"fixture-local"}
+]

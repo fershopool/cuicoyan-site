@@ -1,0 +1,7 @@
+[
+  {"question":"¿Necesito una cuenta para explorar?","answer":"No. Esta entrega funciona sin cuentas. Tus favoritos y preferencias, si los usas, se guardan únicamente en este navegador.","contentStatus":"approved"},
+  {"question":"¿Los eventos de esta versión son reales?","answer":"No necesariamente. Los registros con la etiqueta “Demostración” provienen de los mockups y deben verificarse antes de publicar.","contentStatus":"approved"},
+  {"question":"¿Puedo registrar mi proyecto?","answer":"La página explica el proceso, pero no captura datos todavía. Usa un canal externo solo cuando el equipo lo configure y apruebe.","contentStatus":"approved"},
+  {"question":"¿El mapa usa mi ubicación?","answer":"No. La primera entrega usa puntos conceptuales y una lista alternativa; no solicita geolocalización ni carga mapas externos.","contentStatus":"approved"},
+  {"question":"¿Cómo reporto un problema?","answer":"El canal de contacto está pendiente de configuración. Mientras tanto, no introduzcas datos personales en esta versión.","contentStatus":"approved"}
+]

@@ -1,0 +1,11 @@
+[
+  {"slug":"todos","label":"Todos","color":"brand","icon":"✦"},
+  {"slug":"huapango","label":"Huapango","color":"turquoise","icon":"◒"},
+  {"slug":"fandango","label":"Fandango","color":"orange","icon":"⌁"},
+  {"slug":"danza","label":"Danza","color":"purple","icon":"◌"},
+  {"slug":"teatro","label":"Teatro","color":"red","icon":"▣"},
+  {"slug":"musica","label":"Música","color":"blue","icon":"♫"},
+  {"slug":"talleres","label":"Talleres","color":"pink","icon":"✎"},
+  {"slug":"artes-marciales","label":"Artes marciales","color":"teal","icon":"◇"},
+  {"slug":"cultura-urbana","label":"Cultura urbana","color":"orange","icon":"◉"}
+]
