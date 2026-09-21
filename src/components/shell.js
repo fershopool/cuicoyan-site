@@ -36,7 +36,7 @@ function ensureSiteIcon() {
   const icon = document.querySelector('link[rel="icon"]') || document.createElement('link');
   icon.rel = 'icon';
   icon.type = 'image/png';
-  icon.href = withBase('/public/cuicoyan-logo.png');
+  icon.href = withBase('/public/cuicoyan-logo.png?v=2');
   if (!icon.isConnected) document.head.append(icon);
 }
 
