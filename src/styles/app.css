@@ -193,7 +193,7 @@
   .footer-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 620px) {
-  body::before { opacity: .16; }
+  body::before, body::after { width: 44px; opacity: .48; background-size: 112px 112px; }
   .brand { min-width: 0; }
   .brand img { width: 42px; height: 42px; flex-basis: 42px; }
   .brand-name { font-size: 1.28rem; }

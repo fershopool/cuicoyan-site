@@ -12,6 +12,7 @@ const nav = [
 function link(label, href, key, current) { return el('a', { href, text: label, attrs: current === key ? { 'aria-current': 'page' } : {} }); }
 
 export function renderShell(routeKey) {
+  ensureSiteIcon();
   const current = routeKey || routeForPath();
   const header = el('header', { className: 'site-header' }, [
     el('div', { className: 'container header-inner' }, [
@@ -29,6 +30,14 @@ export function renderShell(routeKey) {
   document.body.prepend(header);
   document.body.append(el('div', { id: 'site-live', className: 'sr-only', attrs: { 'aria-live': 'polite', 'aria-atomic': 'true' } }));
   setupShell();
+}
+
+function ensureSiteIcon() {
+  const icon = document.querySelector('link[rel="icon"]') || document.createElement('link');
+  icon.rel = 'icon';
+  icon.type = 'image/svg+xml';
+  icon.href = withBase('/public/favicon.svg');
+  if (!icon.isConnected) document.head.append(icon);
 }
 
 function relativeAsset(path) {
