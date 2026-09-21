@@ -16,7 +16,7 @@ export function renderShell(routeKey) {
   const current = routeKey || routeForPath();
   const header = el('header', { className: 'site-header' }, [
     el('div', { className: 'container header-inner' }, [
-      el('a', { className: 'brand', href: routes.home, attrs: { 'aria-label': 'Cuicoyan, inicio' } }, [el('img', { src: relativeAsset('src/assets/brand/logo.svg'), alt: '' }), el('span', { className: 'brand-copy' }, [el('strong', { className: 'brand-name', text: 'Cuicoyan' }), el('small', { className: 'brand-tagline', text: 'Donde la ciudad\nencuentra su escenario.' })])]),
+      el('a', { className: 'brand', href: routes.home, attrs: { 'aria-label': 'Cuicoyan, inicio' } }, [el('img', { src: relativeAsset('public/cuicoyan-logo.png'), alt: '' }), el('span', { className: 'brand-copy' }, [el('strong', { className: 'brand-name', text: 'Cuicoyan' }), el('small', { className: 'brand-tagline', text: 'Donde la ciudad\nencuentra su escenario.' })])]),
       el('nav', { className: 'main-nav', attrs: { 'aria-label': 'Navegación principal' } }, nav.map(([label, href, key]) => link(label, href, key, current))),
       el('div', { className: 'header-tools' }, [
         el('button', { className: 'icon-button theme-toggle', id: 'theme-toggle', type: 'button', attrs: { 'aria-label': 'Cambiar tema', 'aria-pressed': 'false' } }, [el('span', { attrs: { 'aria-hidden': 'true' }, text: '☼' }), el('span', { attrs: { 'aria-hidden': 'true' }, text: '◐' })]),
@@ -35,8 +35,8 @@ export function renderShell(routeKey) {
 function ensureSiteIcon() {
   const icon = document.querySelector('link[rel="icon"]') || document.createElement('link');
   icon.rel = 'icon';
-  icon.type = 'image/svg+xml';
-  icon.href = withBase('/public/favicon.svg');
+  icon.type = 'image/png';
+  icon.href = withBase('/public/cuicoyan-logo.png');
   if (!icon.isConnected) document.head.append(icon);
 }
 
@@ -63,7 +63,7 @@ export function renderFooter() {
   document.body.append(el('footer', { className: 'site-footer' }, [
     el('div', { className: 'container' }, [
       el('div', { className: 'footer-grid' }, [
-        el('div', { className: 'prose' }, [el('a', { className: 'brand', href: routes.home }, [el('img', { src: relativeAsset('src/assets/brand/logo.svg'), alt: '' }), el('span', { className: 'brand-copy' }, [el('strong', { className: 'brand-name', text: 'Cuicoyan' }), el('small', { className: 'brand-tagline', text: 'Donde la ciudad encuentra su escenario.' })])]), el('p', { className: 'muted', text: 'Una guía para encontrar cultura viva cerca de ti.' }), el('p', { className: 'demo-label', text: 'Staging estático' })]),
+        el('div', { className: 'prose' }, [el('a', { className: 'brand', href: routes.home }, [el('img', { src: relativeAsset('public/cuicoyan-logo.png'), alt: '' }), el('span', { className: 'brand-copy' }, [el('strong', { className: 'brand-name', text: 'Cuicoyan' }), el('small', { className: 'brand-tagline', text: 'Donde la ciudad encuentra su escenario.' })])]), el('p', { className: 'muted', text: 'Una guía para encontrar cultura viva cerca de ti.' }), el('p', { className: 'demo-label', text: 'Staging estático' })]),
         el('nav', { attrs: { 'aria-label': 'Descubrimiento' } }, [el('strong', { text: 'Descubre' }), el('a', { href: routes.explorar, text: 'Explorar' }), el('a', { href: routes.eventos, text: 'Eventos' }), el('a', { href: routes.artistas, text: 'Artistas' }), el('a', { href: routes.foros, text: 'Foros' }), el('a', { href: routes.mapa, text: 'Mapa cultural' })]),
         el('nav', { attrs: { 'aria-label': 'Participación' } }, [el('strong', { text: 'Participa' }), el('a', { href: routes.creadores, text: 'Para creadores' }), el('a', { href: routes.unete, text: 'Únete' }), el('a', { href: routes.convocatorias, text: 'Convocatorias' }), el('a', { href: routes.favoritos, text: 'Favoritos' })]),
         el('nav', { attrs: { 'aria-label': 'Información' } }, [el('strong', { text: 'Cuicoyan' }), el('a', { href: routes.sobre, text: 'Sobre Cuicoyan' }), el('a', { href: routes.ayuda, text: 'Ayuda' }), el('a', { href: routes.accesibilidad, text: 'Accesibilidad' }), el('a', { href: routes.privacidad, text: 'Privacidad' }), el('a', { href: routes.terminos, text: 'Términos' })]),
