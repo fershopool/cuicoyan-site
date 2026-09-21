@@ -1,0 +1,59 @@
+{
+  "generated_at": "2026-09-20",
+  "boundary": {
+    "file": "limites/cdmx.geojson",
+    "source_file": "fuentes/alcaldias-cdmx-inegi-2020.geojson",
+    "source_url": "https://datos.cdmx.gob.mx/es/dataset/bae265a8-d1f6-4614-b399-4184bc93e027/resource/deb5c583-84e2-4e07-a706-1b3a0dbc99b0/download/deb5c583-84e2-4e07-a706-1b3a0dbc99b0.json",
+    "source": "Marco Geoestadístico 2020 - INEGI / Portal de Datos Abiertos de la CDMX",
+    "license": "CC-BY-4.0-ESP",
+    "feature_count": 16,
+    "bounds": [-99.364924, 19.048237, -98.940303, 19.592757]
+  },
+  "basemap": {
+    "file": "mapas/cdmx.pmtiles",
+    "source_url": "https://build.protomaps.com/20260920.pmtiles",
+    "schema": "Protomaps Basemap v4",
+    "tile_type": "MVT",
+    "min_zoom": 0,
+    "max_zoom": 15,
+    "addressed_tiles": 1729,
+    "size_bytes": 24052956,
+    "sha256": "774b51d89f70d018d1b8d616cc398cee29208dc8adbec51af364024021ea48c8",
+    "attribution": "© OpenStreetMap contributors"
+  },
+  "style": {
+    "generator": "@protomaps/basemaps 5.7.2",
+    "files": [
+      "estilos/protomaps-light-base.local.json",
+      "estilos/cuicoyan-style.local.json"
+    ],
+    "language": "es",
+    "palette": {
+      "marfil": "#FFF9F8",
+      "noche": "#11152E",
+      "bugambilia": "#E91662",
+      "turquesa": "#009BA5",
+      "cempasuchil": "#E96F00",
+      "jacaranda": "#7936D2"
+    },
+    "administrative_overlay": {
+      "source": "limites/cdmx.geojson",
+      "features": 16,
+      "layers": [
+        "alcaldias-relleno",
+        "alcaldias-divisiones",
+        "alcaldias-nombres"
+      ]
+    },
+    "outside_overlay": {
+      "mask": "limites/fuera-cdmx.geojson",
+      "label_points": "limites/proximamente-cdmx.geojson",
+      "label": "Próximamente"
+    }
+  },
+  "tools": {
+    "pmtiles_cli": "1.31.2",
+    "maplibre_gl_js": "6.10.0",
+    "pmtiles_js": "4.5.0"
+  }
+}
