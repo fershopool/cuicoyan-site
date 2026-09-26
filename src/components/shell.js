@@ -11,9 +11,22 @@ const nav = [
 
 function link(label, href, key, current) { return el('a', { href, text: label, attrs: current === key ? { 'aria-current': 'page' } : {} }); }
 
+function bottomLink(label, href, key, icon, current) {
+  return el('a', { className: 'bottom-nav-link', href, attrs: current === key ? { 'aria-current': 'page' } : {} }, [
+    el('span', { className: 'bottom-nav-icon', attrs: { 'aria-hidden': 'true' }, text: icon }),
+    el('small', { text: label }),
+  ]);
+}
+
 export function renderShell(routeKey) {
   ensureSiteIcon();
   const current = routeKey || routeForPath();
+  const bottomItems = [
+    ['Inicio', routes.home, 'home', '⌂'],
+    ['Explorar', routes.explorar, 'explorar', '⌕'],
+    ['Eventos', routes.eventos, 'eventos', '◷'],
+    ['Mapa', routes.mapa, 'mapa', '⌖'],
+  ];
   const header = el('header', { className: 'site-header' }, [
     el('div', { className: 'container header-inner' }, [
       el('a', { className: 'brand', href: routes.home, attrs: { 'aria-label': 'Cuicoyan, inicio' } }, [el('img', { src: relativeAsset('public/cuicoyan-logo.png'), alt: '' }), el('span', { className: 'brand-copy' }, [el('strong', { className: 'brand-name', text: 'Cuicoyan' }), el('small', { className: 'brand-tagline', text: 'Donde la ciudad\nencuentra su escenario.' })])]),
@@ -21,10 +34,16 @@ export function renderShell(routeKey) {
       el('div', { className: 'header-tools' }, [
         el('button', { className: 'icon-button theme-toggle', id: 'theme-toggle', type: 'button', attrs: { 'aria-label': 'Cambiar tema', 'aria-pressed': 'false' } }, [el('span', { attrs: { 'aria-hidden': 'true' }, text: '☼' }), el('span', { attrs: { 'aria-hidden': 'true' }, text: '◐' })]),
         el('a', { className: 'button', href: routes.unete, text: 'Únete a Cuicoyan' }),
-        el('button', { className: 'icon-button menu-button', id: 'menu-toggle', type: 'button', attrs: { 'aria-label': 'Abrir menú', 'aria-expanded': 'false', 'aria-controls': 'mobile-drawer' }, text: '☰' }),
       ]),
     ]),
     el('div', { className: 'mobile-drawer', id: 'mobile-drawer', attrs: { hidden: '' } }, [el('nav', { attrs: { 'aria-label': 'Navegación móvil' } }, nav.map(([label, href, key]) => link(label, href, key, current))), el('a', { className: 'button', href: routes.unete, text: 'Únete a Cuicoyan' })]),
+    el('nav', { className: 'bottom-nav', attrs: { 'aria-label': 'Navegación rápida' } }, [
+      ...bottomItems.map(([label, href, key, icon]) => bottomLink(label, href, key, icon, current)),
+      el('button', { className: 'bottom-nav-more', id: 'menu-toggle', type: 'button', attrs: { 'aria-label': 'Abrir menú', 'aria-expanded': 'false', 'aria-controls': 'mobile-drawer' } }, [
+        el('span', { className: 'bottom-nav-icon', attrs: { 'aria-hidden': 'true' }, text: '☰' }),
+        el('small', { text: 'Más' }),
+      ]),
+    ]),
   ]);
   document.body.prepend(el('a', { className: 'skip-link', href: '#contenido', text: 'Saltar al contenido' }));
   document.body.prepend(header);
