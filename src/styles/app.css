@@ -166,6 +166,12 @@
 .interest-grid input { position: absolute; opacity: 0; }
 .interest-grid span { display: inline-flex; min-height: 48px; align-items: center; padding: .7rem 1rem; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); font-weight: 700; }
 .interest-grid input:checked + span { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 13%, var(--surface)); color: var(--primary); }
+.account-form { display: grid; gap: .75rem; max-width: 720px; }
+.account-form label { color: var(--noche); font-weight: 800; }
+.account-form input, .account-form textarea { width: 100%; min-height: 48px; padding: .75rem .9rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--noche); font: inherit; }
+.account-form textarea { resize: vertical; }
+.account-form input:focus, .account-form textarea:focus { border-color: var(--primary); outline: 2px solid color-mix(in srgb, var(--primary) 20%, transparent); }
+.form-error { min-height: 1.35rem; color: var(--primary); font-weight: 700; }
 
 @media (max-width: 1180px) {
   .main-nav { gap: .65rem; font-size: .8rem; }

@@ -67,10 +67,11 @@ function venueCoordinates(venue) {
 }
 
 function createPopupContent(venue) {
+  const isConceptual = venue.mapPoint?.isConceptual;
   return el('div', { className: 'map-popup' }, [
     el('strong', { text: venue.name }),
     el('span', { text: `${venue.zone} · ${venue.categories.join(' · ')}` }),
-    el('small', { text: 'Punto conceptual · por verificar' }),
+    isConceptual ? el('small', { text: 'Punto conceptual · por verificar' }) : venue.address ? el('small', { text: venue.address }) : null,
     el('a', { href: routes.foro(venue.slug), text: 'Ver espacio' }),
   ]);
 }
@@ -118,8 +119,9 @@ function mountCartography(mapCard, canvas, venues, select, status) {
           markers.set(venue.id, { marker, element: markerElement });
         });
         mapCard.classList.add('map-ready');
-        status.textContent = `Cartografía local activa · ${markers.size} espacios demostrativos`;
-        select('venue-alicia');
+        const published = venues.filter((venue) => venue.coordinates);
+        status.textContent = published.length ? `Cartografía local activa · ${markers.size} espacios publicados` : `Cartografía local activa · ${markers.size} espacios conceptuales`;
+        select(venues.find((venue) => venue.id === 'venue-alicia')?.id || venues[0]?.id);
         map.resize();
       });
 
@@ -155,10 +157,13 @@ export function mapView(venues, selectedId = 'venue-alicia') {
   }
 
   venues.forEach((venue, index) => {
-    const point = venue.mapPoint || { x: 50, y: 50 };
-    const pin = el('button', { className: 'map-pin', type: 'button', style: `left:${point.x}%;top:${point.y}%`, attrs: { 'aria-label': `Seleccionar ${venue.name}`, 'aria-pressed': String(venue.id === selectedId) } }, [el('span', { text: String(index + 1) })]);
-    pin.addEventListener('click', () => select(venue.id, { center: true }));
-    map.append(pin);
+    const isConceptual = venue.mapPoint?.isConceptual;
+    if (isConceptual) {
+      const point = venue.mapPoint;
+      const pin = el('button', { className: 'map-pin', type: 'button', style: `left:${point.x}%;top:${point.y}%`, attrs: { 'aria-label': `Seleccionar ${venue.name}`, 'aria-pressed': String(venue.id === selectedId) } }, [el('span', { text: String(index + 1) })]);
+      pin.addEventListener('click', () => select(venue.id, { center: true }));
+      map.append(pin);
+    }
     const item = el('a', { className: `map-list-item${venue.id === selectedId ? ' active' : ''}`, href: routes.foro(venue.slug), dataset: { venueId: venue.id } }, [el('strong', { text: venue.name }), el('span', { className: 'muted', text: `${venue.zone} · ${venue.categories.join(' · ')}` }), venue.mapPoint?.isConceptual ? el('small', { className: 'muted', text: 'Punto conceptual · por verificar' }) : null]);
     item.addEventListener('mouseenter', () => select(venue.id));
     item.addEventListener('focus', () => select(venue.id));

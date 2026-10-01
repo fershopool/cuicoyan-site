@@ -1,6 +1,6 @@
 export function readUrlState() {
   const params = new URLSearchParams(window.location.search);
-  return { q: params.get('q') || '', categoria: params.get('categoria') || '', intencion: params.get('intencion') || '' };
+  return { q: params.get('q') || '', date: params.get('date') || 'all', zone: params.get('zone') || '', categoria: params.get('categoria') || '', intencion: params.get('intencion') || '' };
 }
 
 export function goWithState(path, state = {}) {

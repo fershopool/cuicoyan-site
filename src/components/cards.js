@@ -12,7 +12,7 @@ const eventImages = {
 };
 const venueImages = { 'venue-alicia': 'venue-foro-alicia.webp' };
 
-export function eventImageUrl(event) { return eventImages[event?.slug] ? withBase(`/src/assets/cuicoyan/${eventImages[event.slug]}`) : ''; }
+export function eventImageUrl(event) { return event?.imageUrl || (eventImages[event?.slug] ? withBase(`/src/assets/cuicoyan/${eventImages[event.slug]}`) : ''); }
 export function venueImageUrl(venue) { return venueImages[venue?.id] ? withBase(`/src/assets/cuicoyan/${venueImages[venue.id]}`) : ''; }
 
 function media(title, tone = 'pink', image = '', alt = title) {
@@ -38,12 +38,14 @@ function favoriteButton(type, id, label) {
 
 export function eventCard(event) {
   const venue = getVenueById(event.venueId);
+  const venueName = event.venueName || venue?.name || 'Sede por confirmar';
+  const venueZone = event.venueZone || venue?.zone || 'CDMX';
   return el('article', { className: 'card event-card' }, [
     el('div', { className: 'card-media-wrap' }, [media(event.title, event.imageTone, eventImageUrl(event), `Imagen demostrativa de ${event.title}`), favoriteButton('event', event.id, event.title)]),
     el('div', { className: 'card-body' }, [
-      el('span', { className: 'demo-label', text: 'Demostración' }),
+      el('span', { className: 'demo-label', text: event.isDemo === false ? 'Evento publicado' : 'Demostración' }),
       el('h3', { text: event.title }),
-      el('div', { className: 'card-meta' }, [el('span', { text: `◷ ${event.dateLabel}` }), el('span', { text: `⌖ ${venue?.name || 'Sede por confirmar'} · ${venue?.zone || 'CDMX'}` })]),
+      el('div', { className: 'card-meta' }, [el('span', { text: `◷ ${event.dateLabel}` }), el('span', { text: `⌖ ${venueName} · ${venueZone}` })]),
       el('p', { className: 'muted', text: event.description }),
       el('div', { className: 'category-row' }, event.categorySlugs.map((category) => el('span', { className: 'badge', text: category }))),
       el('div', { className: 'card-footer' }, [el('strong', { text: event.priceLabel }), el('a', { className: 'button ghost', href: routes.evento(event.slug), text: 'Ver evento →' })]),
