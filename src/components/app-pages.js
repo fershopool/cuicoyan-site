@@ -7,6 +7,9 @@ import { favoriteButton, eventDateParts, eventArtKeys, eventImageUrl, venueImage
 import { getFavorites, isFavorite, toggleFavorite } from '../services/favorites.service.js';
 import { getCategories, getVenueById, getArtistById } from '../services/content.service.js';
 import { mapView } from './map.js';
+import { profileHero, safeUrl } from './profile-kit.js';
+import { TEST_EDIT_ACCESS } from '../config/test-access.js';
+import { DAYS, SERVICES, ACCESS, VENUE_TYPES, SOCIALS } from '../services/profile-draft.service.js';
 
 const mount = (main) => { $('#app').replaceWith(main); return main; };
 const labelOf = () => Object.fromEntries(getCategories().map((category) => [category.slug, category.label]));
@@ -168,7 +171,7 @@ export function mapBlock(venues, initialId, onSelect) {
   const view = mapView(venues, initial.id, (venue) => { rows.forEach((row) => row.classList.toggle('active', row.dataset.venueId === venue.id)); onSelect?.(venue); });
   const shell = el('div', { className: 'map-shell' }, [view.map, el('span', { className: 'map-region' }, [icon('pin', { size: 22 }), 'CDMX', icon('chevron', { size: 16, className: 'caret' })])]);
   rows.forEach((row) => row.classList.toggle('active', row.dataset.venueId === initial.id));
-  return { shell, rows, initial };
+  return { shell, rows, initial, view };
 }
 
 export function renderMapPage(venues) {
@@ -182,32 +185,63 @@ export function renderMapPage(venues) {
     selectedLink.replaceChildren(placeBadge(), el('span', { className: 'place-link-text' }, [el('strong', { text: venue.name }), el('span', { text: placeWhere(venue) })]), icon('chevron', { size: 22 }));
     selectedLink.href = routes.foro(venue.slug);
   }
-  const { shell, rows, initial } = mapBlock(venues, 'venue-alicia', paintSelected);
+  const { shell, rows, initial, view } = mapBlock(venues, 'venue-alicia', paintSelected);
+  const present = new Set(venues.flatMap((venue) => venue.categorySlugs || []));
+  const filterChips = getCategories().filter((category) => category.slug === 'todos' || present.has(category.slug)).map((category) => { const chip = el('button', { type: 'button', className: 'pe-chip', text: category.label, attrs: { 'aria-pressed': String(category.slug === 'todos') } }); chip.addEventListener('click', () => { const ids = view.filter(category.slug); filterChips.forEach((other) => other.setAttribute('aria-pressed', String(other === chip))); rows.forEach((row) => { row.hidden = !ids.includes(row.dataset.venueId); }); announce(`${ids.length} espacios`); }); return chip; });
+  const filters = el('div', { className: 'pe-chips map-filter', attrs: { role: 'group', 'aria-label': 'Filtrar el mapa por categoría' } }, filterChips);
   const head = el('header', { className: 'map-head' }, [el('div', { className: 'map-head-copy' }, [el('span', { className: 'eyebrow deco', text: 'Explora la ciudad' }), el('h1', { text: 'Mapa cultural' }), el('p', { text: 'Un vistazo a los foros y espacios culturales de CDMX.' })]), ...['light', 'dark'].map((mode) => el('img', { className: `map-head-art mode-${mode}`, src: withBase(`/src/assets/mockup/palacio-mapa-${mode}.svg`), alt: '', decoding: 'async' }))]);
   const selected = el('section', { className: 'place-selected', attrs: { 'aria-live': 'polite' } }, [el('span', { className: 'eyebrow', text: 'Lugar seleccionado' }), selectedTitle, selectedCopy, selectedLink]);
   const places = el('section', { className: 'place-list' }, [el('div', { className: 'block-title' }, [el('h2', { text: `${numberWords[venues.length] || venues.length} espacios para comenzar` }), el('span', { className: 'see-all' }, ['CDMX', icon('chevron', { size: 16 })])]), el('div', { className: 'place-rows' }, rows)]);
   paintSelected(initial);
-  wrap('map-page', [head, el('div', { className: 'map-grid' }, [el('div', { className: 'map-col' }, [shell, selected]), el('div', { className: 'map-col' }, [places])]), demoNote('Cada punto del mapa es conceptual y está pendiente de verificación geográfica. Mapa: © OpenStreetMap / Protomaps.')]);
+  wrap('map-page', [head, filters, el('div', { className: 'map-grid' }, [el('div', { className: 'map-col' }, [shell, selected]), el('div', { className: 'map-col' }, [places])]), demoNote('Cada punto del mapa es conceptual y está pendiente de verificación geográfica. Mapa: © OpenStreetMap / Protomaps.')]);
 }
 
 /* ------------------------------------------------------------------ Fichas */
 export function renderArtistProfile(artist, { events }) {
   const next = events.filter((event) => event.id === artist.nextEventId || (event.artistIds || []).includes(artist.id));
+  const custom = artist.draft;
   const quetzal = artist.slug === 'raices-del-viento';
   const art = quetzal ? el('img', { className: 'profile-quetzal', src: asset('quetzal'), alt: '', decoding: 'async' }) : el('span', { className: 'profile-portrait' }, [avatar(artist)]);
-  const hero = el('section', { className: 'profile-hero', dataset: { tone: artist.tone || 'pink' } }, [el('div', { className: 'profile-copy' }, [el('span', { className: 'eyebrow', text: 'Artes vivas · CDMX' }), el('h1', { text: artist.name }), el('p', { className: 'profile-tags' }, [artist.discipline, ' • ', artist.tagline]), el('p', { className: 'profile-short', text: artist.bio })]), art, favoriteButton('artist', artist.id, artist.name)]);
-  const bio = el('section', { className: 'profile-block' }, [sectionTitle('flower', 'Biografía'), el('p', { className: 'profile-bio', text: artist.longBio || artist.bio })]);
+  const hero = custom ? profileHero(artist, custom).node : el('section', { className: 'profile-hero', dataset: { tone: artist.tone || 'pink' } }, [el('div', { className: 'profile-copy' }, [el('span', { className: 'eyebrow', text: 'Artes vivas · CDMX' }), el('h1', { text: artist.name }), el('p', { className: 'profile-tags' }, [artist.discipline, ' • ', artist.tagline]), el('p', { className: 'profile-short', text: artist.bio })]), art, favoriteButton('artist', artist.id, artist.name)]);
+  const bio = el('section', { className: 'profile-block' }, [sectionTitle('flower', 'Biografía'), el('p', { className: 'profile-bio', text: (custom?.longBio) || artist.longBio || artist.bio })]);
   const dates = el('section', { className: 'profile-block' }, [sectionTitle('calendar', 'Próximas fechas', seeAll(routes.eventos)), next.length ? el('div', { className: 'event-rows' }, next.map(eventRow)) : el('p', { className: 'muted', text: 'Aún no hay fechas confirmadas.' })]);
-  wrap('profile-page', [backLink('Regresar', routes.artistas), hero, bio, dates, isDemo(artist) ? demoNote('Perfil demostrativo: no se muestran contacto, redes ni métricas hasta contar con autorización.') : null]);
+  wrap('profile-page', [backLink('Regresar', routes.artistas), hero, custom?.sections.bio === false ? null : bio, custom?.sections.dates === false ? null : dates, isDemo(artist) ? demoNote('Perfil demostrativo: no se muestran contacto, redes ni métricas hasta contar con autorización.') : null, editButton('artista', artist)]);
+}
+
+// ponytail: botón de pruebas hacia el editor del registro; se oculta con TEST_EDIT_ACCESS = false.
+const editButton = (kind, record) => (TEST_EDIT_ACCESS ? el('a', { className: 'button secondary', href: `${routes.perfil}?tipo=${kind}&id=${record.slug}`, text: 'Editar perfil' }) : null);
+const extLink = (href, label) => el('a', { href, text: label, target: '_blank', rel: 'noopener noreferrer' });
+
+// Filas de «Información del lugar» a partir del borrador del foro.
+function venueInfoRows(venue, d) {
+  const names = { ...Object.fromEntries(SERVICES), ...Object.fromEntries(ACCESS) };
+  const hours = DAYS.map(([key, name]) => { const h = d.hours[key]; return [name, h.closed ? 'Cerrado' : h.open && h.close ? `${h.open} – ${h.close}` : '']; }).filter(([, value]) => value);
+  const contact = [d.phone && el('a', { href: `tel:${d.phone.replace(/[^\d+]/g, '')}`, text: d.phone }), d.email && el('a', { href: `mailto:${d.email}`, text: d.email }), safeUrl(d.website) && extLink(d.website, d.website.replace(/^https?:\/\//, '')), ...SOCIALS.filter(([id]) => d.social[id]).map(([id, name]) => `${name}: ${d.social[id]}`)].filter(Boolean);
+  const where = [venue.zone, venue.address].filter(Boolean).join(' · ');
+  const rent = d.rentMode === 'price' && d.rent ? `Renta: ${d.rent}` : d.rentMode === 'contact' ? 'Renta: contáctanos' : '';
+  const size = [d.capacity && `Aforo: ${d.capacity} personas`, rent].filter(Boolean).join(' · ');
+  const list = (items) => el('ul', { className: 'venue-chips' }, items.map((item) => el('li', { text: names[item] || item })));
+  return [
+    ['pin', 'Dirección', el('div', {}, [where, d.directions ? el('small', { text: d.directions }) : null, safeUrl(d.mapsUrl) ? extLink(d.mapsUrl, 'Abrir en Google Maps') : null])],
+    ['clock', 'Horario', hours.length || d.hoursNote ? el('div', { className: 'venue-hours' }, [hours.length ? el('ul', {}, hours.map(([name, value]) => el('li', {}, [el('span', { text: name }), el('b', { text: value })]))) : null, d.hoursNote ? el('small', { text: d.hoursNote }) : null]) : 'Por confirmar'],
+    ['phone', 'Contacto', contact.length ? el('div', { className: 'venue-contact' }, contact.map((item) => el('span', {}, [item]))) : 'Por confirmar'],
+    ['access', 'Accesibilidad', d.access.length || d.accessNote ? el('div', {}, [d.access.length ? list(d.access) : null, d.accessNote ? el('small', { text: d.accessNote }) : null]) : 'Por confirmar'],
+    size ? ['users', 'Aforo y renta', size] : null,
+    d.services.length ? ['sparkles', 'Servicios', list(d.services)] : null,
+  ].filter(Boolean);
 }
 
 export function renderVenueProfile(venue, { events }) {
+  const d = venue.draft;
   const at = events.filter((event) => event.venueId === venue.id);
   const photo = venueImageUrl(venue) || (venue.slug === 'foro-alicia' ? asset('foro-alicia-hero') : '');
-  const hero = el('section', { className: `venue-hero${photo ? '' : ' no-photo'}` }, [photo ? el('img', { className: 'venue-hero-photo', src: venue.slug === 'foro-alicia' ? asset('foro-alicia-hero') : photo, alt: '', decoding: 'async' }) : null, el('div', { className: 'venue-hero-copy' }, [el('span', { className: 'venue-kicker' }, [el('span', { className: 'place-badge small', attrs: { 'aria-hidden': 'true' } }, [icon('flower', { size: 20, strokeWidth: 1.6 })]), 'Foro cultural · CDMX']), el('h1', { text: venue.name }), el('p', { text: venue.description })])]);
-  const info = [['pin', 'Dirección', [venue.zone, venue.address].filter(Boolean).join(' · ')], ['clock', 'Horario', 'Por confirmar'], ['phone', 'Contacto', 'Por confirmar'], ['access', 'Accesibilidad', 'Por confirmar']];
-  const card = el('section', { className: 'venue-info' }, [el('h3', {}, [icon('flower', { size: 22 }), 'Información del lugar']), el('div', { className: 'venue-info-grid' }, [el('dl', {}, info.map(([iconName, term, value]) => el('div', {}, [icon(iconName, { size: 24 }), el('dt', { text: term }), el('dd', { text: value })]))), el('div', { className: 'venue-minimap' }, [el('span', { className: 'minimap-pin', attrs: { 'aria-hidden': 'true' } }, [icon('flower', { size: 26, strokeWidth: 1.5 })]), el('span', { className: 'minimap-zone', text: venue.zone }), el('a', { className: 'minimap-link', href: `${routes.mapa}?foro=${venue.slug}` }, ['Ver en mapa', icon('external', { size: 18 })])])])]);
-  wrap('venue-page', [el('div', { className: 'detail-back' }, [el('a', { className: 'back-circle', href: routes.foros, attrs: { 'aria-label': 'Volver a foros' } }, [icon('back', { size: 24 })]), el('span', { text: 'Detalle del espacio' })]), hero, el('section', { className: 'profile-block' }, [sectionTitle('flower', 'Sobre el espacio'), el('p', { className: 'profile-bio', text: venue.description })]), card, el('section', { className: 'profile-block' }, [sectionTitle('flower', 'Próximas fechas', seeAll(routes.eventos)), at.length ? el('div', { className: 'event-rows' }, at.map(eventRow)) : el('p', { className: 'muted', text: 'Aún no hay fechas confirmadas.' })]), isDemo(venue) ? demoNote('Espacio demostrativo: horarios, contacto y accesibilidad requieren una fuente aprobada.') : null]);
+  const typeLabel = (type) => VENUE_TYPES.find(([value]) => value === type)?.[1];
+  const hero = d ? profileHero(venue, d, { eyebrow: 'Foro cultural · CDMX', tags: (x) => [typeLabel(x.type), x.zone] }).node : el('section', { className: `venue-hero${photo ? '' : ' no-photo'}` }, [photo ? el('img', { className: 'venue-hero-photo', src: venue.slug === 'foro-alicia' ? asset('foro-alicia-hero') : photo, alt: '', decoding: 'async' }) : null, el('div', { className: 'venue-hero-copy' }, [el('span', { className: 'venue-kicker' }, [el('span', { className: 'place-badge small', attrs: { 'aria-hidden': 'true' } }, [icon('flower', { size: 20, strokeWidth: 1.6 })]), 'Foro cultural · CDMX']), el('h1', { text: venue.name }), el('p', { text: venue.description })])]);
+  const info = d ? venueInfoRows(venue, d) : [['pin', 'Dirección', [venue.zone, venue.address].filter(Boolean).join(' · ')], ['clock', 'Horario', 'Por confirmar'], ['phone', 'Contacto', 'Por confirmar'], ['access', 'Accesibilidad', 'Por confirmar']];
+  const card = el('section', { className: 'venue-info' }, [el('h3', {}, [icon('flower', { size: 22 }), 'Información del lugar']), el('div', { className: 'venue-info-grid' }, [el('dl', {}, info.map(([iconName, term, value]) => el('div', {}, [icon(iconName, { size: 24 }), el('dt', { text: term }), el('dd', {}, [value])]))), el('div', { className: 'venue-minimap' }, [el('span', { className: 'minimap-pin', attrs: { 'aria-hidden': 'true' } }, [icon(venue.mapIcon || 'flower', { size: 26, strokeWidth: 1.5 })]), el('span', { className: 'minimap-zone', text: venue.zone }), venue.mapVisible === false ? null : el('a', { className: 'minimap-link', href: `${routes.mapa}?foro=${venue.slug}` }, ['Ver en mapa', icon('external', { size: 18 })])])])]);
+  const show = (key) => d?.sections[key] !== false;
+  const gallery = d?.gallery.length ? el('section', { className: 'profile-block' }, [sectionTitle('image', 'Galería'), el('div', { className: 'venue-gallery' }, d.gallery.map((src, index) => el('img', { src, alt: `Foto ${index + 1} de ${venue.name}`, loading: 'lazy', decoding: 'async' })))]) : null;
+  wrap('venue-page', [el('div', { className: 'detail-back' }, [el('a', { className: 'back-circle', href: routes.foros, attrs: { 'aria-label': 'Volver a foros' } }, [icon('back', { size: 24 })]), el('span', { text: 'Detalle del espacio' })]), hero, show('about') ? el('section', { className: 'profile-block' }, [sectionTitle('flower', 'Sobre el espacio'), el('p', { className: 'profile-bio', text: d?.longBio || venue.description })]) : null, show('info') ? card : null, show('gallery') ? gallery : null, show('dates') ? el('section', { className: 'profile-block' }, [sectionTitle('flower', 'Próximas fechas', seeAll(routes.eventos)), at.length ? el('div', { className: 'event-rows' }, at.map(eventRow)) : el('p', { className: 'muted', text: 'Aún no hay fechas confirmadas.' })]) : null, isDemo(venue) ? demoNote('Espacio demostrativo: horarios, contacto y accesibilidad requieren una fuente aprobada.') : null, editButton('foro', venue)]);
 }
 
 export function renderEventDetail(item, { artists }) {

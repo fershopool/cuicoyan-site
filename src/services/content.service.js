@@ -6,11 +6,12 @@ import convocatorias from '../data/convocatorias.json' with { type: 'json' };
 import help from '../data/help.json' with { type: 'json' };
 import { isVisible } from '../config/content-status.js';
 import { environment } from '../config/environment.js';
+import { withDraft } from './profile-draft.service.js';
 
 const visible = (items) => items.filter(isVisible);
 export const getEvents = () => visible(events);
-export const getArtists = () => visible(artists);
-export const getVenues = () => visible(venues);
+export const getArtists = () => visible(artists).map((item) => withDraft('artista', item));
+export const getVenues = () => visible(venues).map((item) => withDraft('foro', item));
 export const getCategories = () => categories;
 export const getCalls = () => visible(convocatorias);
 export const getHelp = () => visible(help);
@@ -204,6 +205,5 @@ export async function loadRemoteSpaces() {
   if (!response.ok) throw new Error(`Cuicoyan API returned ${response.status}`);
   const body = await response.json();
   if (!Array.isArray(body?.data)) return null;
-  const items = body.data.map(mapRemoteSpace).filter((item) => item.id && item.slug && item.name);
-  return items;
+  return body.data.map(mapRemoteSpace).filter((item) => item.id && item.slug && item.name).map((item) => withDraft('foro', item));
 }

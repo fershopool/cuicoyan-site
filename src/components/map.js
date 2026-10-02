@@ -1,5 +1,7 @@
 import { el } from '../utils/dom.js';
 import { routes, withBase } from '../config/routes.js';
+import { icon } from './icons.js';
+import { CONCEPTUAL_COORDINATES as conceptualCoordinates } from '../services/profile-draft.service.js';
 
 // MapLibre exige URL absolutas para sprites, glifos y fuentes de datos.
 const cartographyRoot = new URL(withBase('/src/assets/cartografia'), window.location.origin).href.replace(/\/$/, '');
@@ -7,15 +9,6 @@ const mapStyleUrl = `${cartographyRoot}/estilos/cuicoyan-style.local.json`;
 const maplibreUrl = `${cartographyRoot}/recursos/vendor/maplibre-gl.mjs`;
 const maplibreWorkerUrl = `${cartographyRoot}/recursos/vendor/maplibre-gl-worker.mjs`;
 const pmtilesUrl = `${cartographyRoot}/recursos/vendor/pmtiles.js`;
-
-// Coordinates are intentionally approximate until each space is verified.
-const conceptualCoordinates = {
-  'venue-casa-lago': [-99.1855, 19.4244],
-  'venue-alicia': [-99.1581, 19.4169],
-  'venue-centro-espana': [-99.1324, 19.4346],
-  'venue-conchita': [-99.1642, 19.3465],
-  'venue-demo-centro': [-99.1405, 19.4261],
-};
 
 let mapEnginePromise;
 let pmtilesRegistered = false;
@@ -32,7 +25,7 @@ function loadScript(src) {
   });
 }
 
-async function getMapEngine() {
+export async function getMapEngine() {
   if (!mapEnginePromise) {
     mapEnginePromise = (async () => {
       const maplibre = await import(maplibreUrl);
@@ -48,7 +41,7 @@ async function getMapEngine() {
   return mapEnginePromise;
 }
 
-async function loadMapStyle() {
+export async function loadMapStyle() {
   const response = await fetch(mapStyleUrl, { cache: 'force-cache' });
   if (!response.ok) throw new Error(`No se pudo cargar el estilo cartográfico (${response.status}).`);
   const style = await response.json();
@@ -81,19 +74,15 @@ function createPopupContent(venue) {
   ]);
 }
 
-const markerGlyph = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.500l3.500 3.500-3.500 3.500L8.500 6zM5 9.500 8.500 13 5 16.500 1.500 13zM19 9.500l3.500 3.500-3.500 3.500-3.500-3.500zM12 16l3.500 3.500L12 23l-3.500-3.500z"/><circle cx="12" cy="13" r="1.600" fill="currentColor"/></svg>';
+/** Pin del mapa; `mapIcon`/`mapColor` vienen del perfil del foro (por defecto, la flor y el azul de marca). */
+export function paintPin(marker, { mapIcon, mapColor }) {
+  marker.firstElementChild.replaceChildren(icon(mapIcon || 'flower', { size: 20, strokeWidth: 1.6 }));
+  if (mapColor) { marker.dataset.custom = ''; marker.style.setProperty('--pin-color', mapColor); } else { delete marker.dataset.custom; marker.style.removeProperty('--pin-color'); }
+}
 
-function createMarkerElement(venue) {
-  const marker = el('button', {
-    className: 'cartography-marker',
-    type: 'button',
-    attrs: {
-      'aria-label': `Seleccionar ${venue.name}`,
-      'aria-pressed': 'false',
-      title: venue.name,
-    },
-  }, [el('span', { attrs: { 'aria-hidden': 'true' } })]);
-  marker.firstElementChild.innerHTML = markerGlyph;
+export function createMarkerElement(venue, tag = 'button') {
+  const marker = el(tag, { className: 'cartography-marker', attrs: tag === 'button' ? { type: 'button', 'aria-label': `Seleccionar ${venue.name}`, 'aria-pressed': 'false', title: venue.name } : { 'aria-hidden': 'true' } }, [el('span', { attrs: { 'aria-hidden': 'true' } })]);
+  paintPin(marker, venue);
   return marker;
 }
 
@@ -132,6 +121,7 @@ function mountCartography(mapCard, canvas, venues, select, status) {
           const bounds = located.reduce((box, point) => box.extend(point), new maplibre.LngLatBounds(located[0], located[0]));
           map.fitBounds(bounds, { padding: { top: 70, right: 40, bottom: 50, left: 40 }, maxZoom: 12.6, duration: 0 });
         }
+        mapCard._applyFilter?.();
         mapCard.classList.add('map-ready');
         const published = venues.filter((venue) => venue.coordinates);
         status.textContent = published.length ? `Cartografía local activa · ${markers.size} espacios publicados` : `Cartografía local activa · ${markers.size} espacios conceptuales`;
@@ -176,7 +166,7 @@ export function mapView(venues, selectedId = 'venue-alicia', onSelect = null) {
     const isConceptual = venue.mapPoint?.isConceptual;
     if (isConceptual) {
       const point = venue.mapPoint;
-      const pin = el('button', { className: 'map-pin', type: 'button', style: `left:${point.x}%;top:${point.y}%`, attrs: { 'aria-label': `Seleccionar ${venue.name}`, 'aria-pressed': String(venue.id === selectedId) } }, [el('span', { text: String(index + 1) })]);
+      const pin = el('button', { className: 'map-pin', type: 'button', dataset: { venueId: venue.id }, style: `left:${point.x}%;top:${point.y}%`, attrs: { 'aria-label': `Seleccionar ${venue.name}`, 'aria-pressed': String(venue.id === selectedId) } }, [el('span', { text: String(index + 1) })]);
       pin.addEventListener('click', () => select(venue.id, { center: true }));
       map.append(pin);
     }
@@ -186,6 +176,17 @@ export function mapView(venues, selectedId = 'venue-alicia', onSelect = null) {
     list.append(item);
   });
 
+  // Filtro por categoría (principal o secundaria del foro): oculta pines y filas; devuelve los ids visibles.
+  let current = 'todos';
+  const matches = (venue) => current === 'todos' || (venue.categorySlugs || []).includes(current);
+  map._applyFilter = () => venues.forEach((venue) => {
+    const on = matches(venue);
+    const marker = map._cuicoyanMarkers?.get(venue.id); if (marker) marker.element.hidden = !on;
+    list.querySelector(`[data-venue-id="${venue.id}"]`)?.toggleAttribute('hidden', !on);
+    map.querySelector(`.map-pin[data-venue-id="${venue.id}"]`)?.toggleAttribute('hidden', !on);
+  });
+  function filter(slug) { current = slug; map._applyFilter(); return venues.filter(matches).map((venue) => venue.id); }
+
   mountCartography(map, canvas, venues, select, status);
-  return { map, list, select };
+  return { map, list, select, filter };
 }

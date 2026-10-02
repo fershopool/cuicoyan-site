@@ -9,6 +9,7 @@ export const asset = (name) => withBase(`/src/assets/mockup/${name}.webp`);
 const avatarFiles = { 'luna-mestiza': 'avatar-luna-mestiza', 'raices-del-viento': 'avatar-raices-del-viento', 'calle-azul': 'avatar-calle-azul', 'teatro-nube': 'avatar-teatro-nube', 'marea-roja': 'avatar-marea-roja' };
 export function avatar(artist, className = 'avatar') {
   const file = avatarFiles[artist.slug];
+  if (artist.photo) return el('img', { className, src: artist.photo, alt: '', loading: 'lazy', decoding: 'async' });
   if (file) return el('img', { className, src: asset(file), alt: '', loading: 'lazy', decoding: 'async' });
   return el('span', { className: `${className} avatar-initials`, attrs: { 'aria-hidden': 'true' }, text: artist.name.split(' ').map((part) => part[0]).join('').slice(0, 2) });
 }
@@ -23,7 +24,7 @@ const eventImages = {
 const venueImages = { 'venue-alicia': 'venue-foro-alicia.webp' };
 
 export function eventImageUrl(event) { return event?.imageUrl || (eventImages[event?.slug] ? withBase(`/src/assets/cuicoyan/${eventImages[event.slug]}`) : ''); }
-export function venueImageUrl(venue) { return venueImages[venue?.id] ? withBase(`/src/assets/cuicoyan/${venueImages[venue.id]}`) : ''; }
+export function venueImageUrl(venue) { return venue?.photo || (venueImages[venue?.id] ? withBase(`/src/assets/cuicoyan/${venueImages[venue.id]}`) : ''); }
 
 function media(title, tone = 'pink', image = '', alt = title) {
   const [a, b] = tones[tone] || tones.pink;
