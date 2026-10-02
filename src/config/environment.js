@@ -36,6 +36,8 @@ export const environment = {
   cuicoyanApiUrl: cuicoyanApiBase,
   ollinUrl: import.meta.env?.VITE_OLLIN_URL || '',
   externalJoinUrl: import.meta.env?.VITE_EXTERNAL_JOIN_URL || '',
+  // Formularios de registro: FormSubmit reenvía cada envío al correo del equipo (sin backend propio).
+  joinFormEndpoint: import.meta.env?.VITE_JOIN_FORM_ENDPOINT || 'https://formsubmit.co/ajax/cuicoyan.ollin@gmail.com',
   externalContactUrl: import.meta.env?.VITE_EXTERNAL_CONTACT_URL || '',
   supabaseUrl: import.meta.env?.VITE_SUPABASE_URL || supabaseUrl || '',
   supabaseAnonKey: import.meta.env?.VITE_SUPABASE_ANON_KEY || supabaseAnonKey || '',
