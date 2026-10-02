@@ -53,9 +53,10 @@ export function renderShell(routeKey) {
 function ensureSiteIcon() {
   document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]').forEach((link) => link.remove());
   const add = (rel, href, extra = {}) => document.head.append(Object.assign(document.createElement('link'), { rel, href: withBase(href), ...extra }));
-  add('icon', '/public/icon-light-64.png?v=4', { type: 'image/png', media: '(prefers-color-scheme: light)' });
-  add('icon', '/public/icon-dark-64.png?v=4', { type: 'image/png', media: '(prefers-color-scheme: dark)' });
-  add('apple-touch-icon', '/public/apple-touch-icon.png?v=4');
+  add('icon', '/public/tab.ico?v=5', { sizes: '16x16 32x32 48x48' });
+  add('icon', '/public/tab-32.png?v=5', { type: 'image/png', sizes: '32x32' });
+  add('icon', '/public/tab-64.png?v=5', { type: 'image/png', sizes: '64x64' });
+  add('apple-touch-icon', '/public/apple-touch-icon.png?v=5');
 }
 
 function relativeAsset(path) {
