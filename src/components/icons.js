@@ -1,3 +1,5 @@
+import { withBase } from '../config/routes.js';
+
 // Iconos de línea (24×24) para la interfaz tipo app de los mockups. Trazo = currentColor.
 const paths = {
   calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M8 13.5h.01M12 13.5h.01M16 13.5h.01M8 17h.01M12 17h.01M16 17h.01" stroke-width="2.4"/>',
@@ -49,24 +51,11 @@ export function icon(name, { size = 24, className = '', strokeWidth = 1.7 } = {}
   return span;
 }
 
-// Emblema de la app (teselado "C" con patrón geométrico), usado en el encabezado móvil.
+// Emblema de la app: logo de Cuicoyan, usado en el encabezado móvil.
 export function emblem(className = '') {
   const span = document.createElement('span');
   span.className = `emblem ${className}`.trim();
   span.setAttribute('aria-hidden', 'true');
-  span.innerHTML = `<svg viewBox="0 0 100 100" width="100%" height="100%">
-    <defs>
-      <linearGradient id="em-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d4145f"/><stop offset=".55" stop-color="#7b1c8f"/><stop offset="1" stop-color="#0a2a6b"/></linearGradient>
-      <linearGradient id="em-ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5fa2"/><stop offset=".5" stop-color="#b45cff"/><stop offset="1" stop-color="#17e0e4"/></linearGradient>
-    </defs>
-    <rect x="2" y="2" width="96" height="96" rx="24" fill="url(#em-bg)"/>
-    <rect x="5" y="5" width="90" height="90" rx="21" fill="none" stroke="url(#em-ring)" stroke-width="3"/>
-    <g fill="none" stroke="#ffffff" stroke-opacity=".34" stroke-width="1.4">
-      <path d="M13 24l5-5 5 5-5 5zM77 24l5-5 5 5-5 5zM13 76l5-5 5 5-5 5zM77 76l5-5 5 5-5 5z"/>
-      <path d="M32 12h10l3 4-3 4H32zM58 88h10l-3-4 3-4H58zM12 40v10l4 3 4-3V40zM88 60V50l-4-3-4 3v10z"/>
-    </g>
-    <g fill="#17e0e4" fill-opacity=".75"><circle cx="50" cy="10.500" r="1.500"/><circle cx="50" cy="89.500" r="1.500"/><circle cx="10.500" cy="50" r="1.500"/><circle cx="89.500" cy="50" r="1.500"/></g>
-    <text x="50" y="69" text-anchor="middle" font-family="Manrope, 'Bricolage Grotesque', sans-serif" font-weight="800" font-size="62" fill="#fff" style="paint-order:stroke" stroke="#3a0b57" stroke-width="2">C</text>
-  </svg>`;
+  span.innerHTML = `<img src="${withBase('/public/cuicoyan-logo.png')}" alt="" width="100%" height="100%" style="display:block;object-fit:contain">`;
   return span;
 }
