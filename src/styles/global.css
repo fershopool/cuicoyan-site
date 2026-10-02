@@ -40,11 +40,6 @@ body::after {
   -webkit-mask-image: linear-gradient(90deg, #000 0, #000 74%, transparent 100%);
   mask-image: linear-gradient(90deg, #000 0, #000 74%, transparent 100%);
 }
-[data-theme="dark"] body::before,
-[data-theme="dark"] body::after {
-  opacity: .94;
-  background-image: url('../assets/brand/cuicoyan-pattern-dark.svg');
-}
 body > * { position: relative; z-index: 1; }
 h1, h2, h3, h4 {
   margin: 0;

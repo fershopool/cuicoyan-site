@@ -4,8 +4,8 @@
   {"slug":"fandango","label":"Fandango","color":"orange","icon":"⌁"},
   {"slug":"danza","label":"Danza","color":"purple","icon":"◌"},
   {"slug":"teatro","label":"Teatro","color":"red","icon":"▣"},
-  {"slug":"musica","label":"Música","color":"blue","icon":"♫"},
+  {"slug":"musica","label":"Música","color":"teal","icon":"♫"},
   {"slug":"talleres","label":"Talleres","color":"pink","icon":"✎"},
-  {"slug":"artes-marciales","label":"Artes marciales","color":"teal","icon":"◇"},
+  {"slug":"artes-marciales","label":"Artes marciales","color":"blue","icon":"◇"},
   {"slug":"cultura-urbana","label":"Cultura urbana","color":"orange","icon":"◉"}
 ]

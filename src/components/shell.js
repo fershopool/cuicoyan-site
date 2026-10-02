@@ -2,6 +2,7 @@ import { el, $, announce } from '../utils/dom.js';
 import { routes, routeForPath, withBase } from '../config/routes.js';
 import { environment } from '../config/environment.js';
 import { getPreferences, savePreferences } from '../services/preferences.service.js';
+import { icon } from './icons.js';
 
 const nav = [
   ['Inicio', routes.home, 'home'], ['Explorar', routes.explorar, 'explorar'], ['Eventos', routes.eventos, 'eventos'],
@@ -11,9 +12,9 @@ const nav = [
 
 function link(label, href, key, current) { return el('a', { href, text: label, attrs: current === key ? { 'aria-current': 'page' } : {} }); }
 
-function bottomLink(label, href, key, icon, current) {
-  return el('a', { className: 'bottom-nav-link', href, attrs: current === key ? { 'aria-current': 'page' } : {} }, [
-    el('span', { className: 'bottom-nav-icon', attrs: { 'aria-hidden': 'true' }, text: icon }),
+function dockLink(label, href, key, iconName, current) {
+  return el('a', { className: 'dock-link', href, dataset: { tone: key }, attrs: current === key ? { 'aria-current': 'page' } : {} }, [
+    icon(iconName, { size: 28, className: 'dock-icon', strokeWidth: 1.6 }),
     el('small', { text: label }),
   ]);
 }
@@ -21,42 +22,40 @@ function bottomLink(label, href, key, icon, current) {
 export function renderShell(routeKey) {
   ensureSiteIcon();
   const current = routeKey || routeForPath();
-  const bottomItems = [
-    ['Inicio', routes.home, 'home', '⌂'],
-    ['Explorar', routes.explorar, 'explorar', '⌕'],
-    ['Eventos', routes.eventos, 'eventos', '◷'],
-    ['Mapa', routes.mapa, 'mapa', '⌖'],
+  document.body.dataset.route = current;
+  const dockItems = [
+    ['Inicio', routes.home, 'home', 'calendar'],
+    ['Artistas', routes.artistas, 'artistas', 'users'],
+    ['Mapa', routes.mapa, 'mapa', 'map'],
+    ['Favoritos', routes.favoritos, 'favoritos', 'heart'],
   ];
   const header = el('header', { className: 'site-header' }, [
     el('div', { className: 'container header-inner' }, [
+      el('button', { className: 'icon-button menu-button', id: 'menu-toggle', type: 'button', attrs: { 'aria-label': 'Abrir menú', 'aria-expanded': 'false', 'aria-controls': 'mobile-drawer' } }, [icon('menu', { size: 22 })]),
       el('a', { className: 'brand', href: routes.home, attrs: { 'aria-label': 'Cuicoyan, inicio' } }, [el('img', { src: relativeAsset('public/cuicoyan-logo.png'), alt: '' }), el('span', { className: 'brand-copy' }, [el('strong', { className: 'brand-name', text: 'Cuicoyan' }), el('small', { className: 'brand-tagline', text: 'Donde la ciudad\nencuentra su escenario.' })])]),
       el('nav', { className: 'main-nav', attrs: { 'aria-label': 'Navegación principal' } }, nav.map(([label, href, key]) => link(label, href, key, current))),
       el('div', { className: 'header-tools' }, [
-        el('button', { className: 'icon-button theme-toggle', id: 'theme-toggle', type: 'button', attrs: { 'aria-label': 'Cambiar tema', 'aria-pressed': 'false' } }, [el('span', { attrs: { 'aria-hidden': 'true' }, text: '☼' }), el('span', { attrs: { 'aria-hidden': 'true' }, text: '◐' })]),
+        el('button', { className: 'icon-button theme-toggle', id: 'theme-toggle', type: 'button', attrs: { 'aria-label': 'Cambiar tema', 'aria-pressed': 'false' } }, [icon('sun', { size: 17 }), icon('moon', { size: 17 })]),
         el('a', { className: 'button', href: routes.unete, text: 'Únete a Cuicoyan' }),
       ]),
     ]),
     el('div', { className: 'mobile-drawer', id: 'mobile-drawer', attrs: { hidden: '' } }, [el('nav', { attrs: { 'aria-label': 'Navegación móvil' } }, nav.map(([label, href, key]) => link(label, href, key, current))), el('a', { className: 'button', href: routes.unete, text: 'Únete a Cuicoyan' })]),
-    el('nav', { className: 'bottom-nav', attrs: { 'aria-label': 'Navegación rápida' } }, [
-      ...bottomItems.map(([label, href, key, icon]) => bottomLink(label, href, key, icon, current)),
-      el('button', { className: 'bottom-nav-more', id: 'menu-toggle', type: 'button', attrs: { 'aria-label': 'Abrir menú', 'aria-expanded': 'false', 'aria-controls': 'mobile-drawer' } }, [
-        el('span', { className: 'bottom-nav-icon', attrs: { 'aria-hidden': 'true' }, text: '☰' }),
-        el('small', { text: 'Más' }),
-      ]),
-    ]),
   ]);
+  const dock = el('nav', { className: 'app-dock', attrs: { 'aria-label': 'Navegación rápida' } }, dockItems.map(([label, href, key, iconName]) => dockLink(label, href, key, iconName, current)));
   document.body.prepend(el('a', { className: 'skip-link', href: '#contenido', text: 'Saltar al contenido' }));
   document.body.prepend(header);
+  document.body.append(dock);
+  document.body.append(el('div', { className: 'bg-flora', attrs: { 'aria-hidden': 'true' } }));
   document.body.append(el('div', { id: 'site-live', className: 'sr-only', attrs: { 'aria-live': 'polite', 'aria-atomic': 'true' } }));
   setupShell();
 }
 
 function ensureSiteIcon() {
-  const icon = document.querySelector('link[rel="icon"]') || document.createElement('link');
-  icon.rel = 'icon';
-  icon.type = 'image/png';
-  icon.href = withBase('/public/cuicoyan-logo.png?v=2');
-  if (!icon.isConnected) document.head.append(icon);
+  document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]').forEach((link) => link.remove());
+  const add = (rel, href, extra = {}) => document.head.append(Object.assign(document.createElement('link'), { rel, href: withBase(href), ...extra }));
+  add('icon', '/public/icon-light-64.png?v=4', { type: 'image/png', media: '(prefers-color-scheme: light)' });
+  add('icon', '/public/icon-dark-64.png?v=4', { type: 'image/png', media: '(prefers-color-scheme: dark)' });
+  add('apple-touch-icon', '/public/apple-touch-icon.png?v=4');
 }
 
 function relativeAsset(path) {

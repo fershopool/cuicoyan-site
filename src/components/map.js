@@ -1,7 +1,8 @@
 import { el } from '../utils/dom.js';
 import { routes, withBase } from '../config/routes.js';
 
-const cartographyRoot = withBase('/src/assets/cartografia');
+// MapLibre exige URL absolutas para sprites, glifos y fuentes de datos.
+const cartographyRoot = new URL(withBase('/src/assets/cartografia'), window.location.origin).href.replace(/\/$/, '');
 const mapStyleUrl = `${cartographyRoot}/estilos/cuicoyan-style.local.json`;
 const maplibreUrl = `${cartographyRoot}/recursos/vendor/maplibre-gl.mjs`;
 const maplibreWorkerUrl = `${cartographyRoot}/recursos/vendor/maplibre-gl-worker.mjs`;
@@ -56,6 +57,10 @@ async function loadMapStyle() {
   style.glyphs = `${fonts}/{fontstack}/{range}.pbf`;
   style.sprite = sprites;
   style.sources.cuicoyan.url = `pmtiles://${cartographyRoot}/mapas/cdmx.pmtiles`;
+  // Líneas de alcaldía más suaves para que el mapa se lea como en los mockups.
+  for (const layer of style.layers) {
+    if (layer.id === 'alcaldias-divisiones') layer.paint = { ...layer.paint, 'line-opacity': 0.34, 'line-width': ['interpolate', ['linear'], ['zoom'], 8.5, 0.8, 12, 1.2, 15, 1.6], 'line-dasharray': [3, 2] };
+  }
   style.sources['alcaldias-cdmx'].data = `${cartographyRoot}/limites/cdmx.geojson`;
   style.sources['fuera-cdmx'].data = `${cartographyRoot}/limites/fuera-cdmx.geojson`;
   style.sources.proximamente.data = `${cartographyRoot}/limites/proximamente-cdmx.geojson`;
@@ -76,8 +81,10 @@ function createPopupContent(venue) {
   ]);
 }
 
+const markerGlyph = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.500l3.500 3.500-3.500 3.500L8.500 6zM5 9.500 8.500 13 5 16.500 1.500 13zM19 9.500l3.500 3.500-3.500 3.500-3.500-3.500zM12 16l3.500 3.500L12 23l-3.500-3.500z"/><circle cx="12" cy="13" r="1.600" fill="currentColor"/></svg>';
+
 function createMarkerElement(venue) {
-  return el('button', {
+  const marker = el('button', {
     className: 'cartography-marker',
     type: 'button',
     attrs: {
@@ -85,7 +92,9 @@ function createMarkerElement(venue) {
       'aria-pressed': 'false',
       title: venue.name,
     },
-  }, [el('span', { text: '•', attrs: { 'aria-hidden': 'true' } })]);
+  }, [el('span', { attrs: { 'aria-hidden': 'true' } })]);
+  marker.firstElementChild.innerHTML = markerGlyph;
+  return marker;
 }
 
 function mountCartography(mapCard, canvas, venues, select, status) {
@@ -96,8 +105,8 @@ function mountCartography(mapCard, canvas, venues, select, status) {
       const map = new maplibre.Map({
         container: canvas,
         style,
-        center: [-99.1332, 19.4326],
-        zoom: 9.6,
+        center: [-99.1532, 19.4126],
+        zoom: 11.4,
         minZoom: 8.5,
         maxZoom: 18,
         maxBounds: [[-99.6, 18.9], [-98.7, 19.75]],
@@ -118,6 +127,11 @@ function mountCartography(mapCard, canvas, venues, select, status) {
           markerElement.addEventListener('click', () => select(venue.id, { center: true }));
           markers.set(venue.id, { marker, element: markerElement });
         });
+        const located = venues.map(venueCoordinates).filter(Boolean);
+        if (located.length > 1) {
+          const bounds = located.reduce((box, point) => box.extend(point), new maplibre.LngLatBounds(located[0], located[0]));
+          map.fitBounds(bounds, { padding: { top: 70, right: 40, bottom: 50, left: 40 }, maxZoom: 12.6, duration: 0 });
+        }
         mapCard.classList.add('map-ready');
         const published = venues.filter((venue) => venue.coordinates);
         status.textContent = published.length ? `Cartografía local activa · ${markers.size} espacios publicados` : `Cartografía local activa · ${markers.size} espacios conceptuales`;
@@ -139,13 +153,15 @@ function mountCartography(mapCard, canvas, venues, select, status) {
   }, 0);
 }
 
-export function mapView(venues, selectedId = 'venue-alicia') {
+export function mapView(venues, selectedId = 'venue-alicia', onSelect = null) {
   const list = el('div', { className: 'map-list', attrs: { 'aria-label': 'Espacios del mapa' } });
   const canvas = el('div', { className: 'map-canvas', attrs: { 'aria-label': 'Cartografía local de la Ciudad de México' } });
   const status = el('span', { className: 'map-status', text: 'Cargando cartografía local…', attrs: { role: 'status', 'aria-live': 'polite' } });
   const map = el('div', { className: 'map-card', role: 'region', attrs: { 'aria-label': 'Mapa cultural de espacios de CDMX' } }, [canvas, status]);
 
   function select(id, options = {}) {
+    const chosen = venues.find((item) => item.id === id);
+    if (chosen && onSelect) onSelect(chosen);
     map.querySelectorAll('.map-pin').forEach((pin, index) => pin.setAttribute('aria-pressed', String(venues[index]?.id === id)));
     map.querySelectorAll('.cartography-marker').forEach((pin) => pin.setAttribute('aria-pressed', String(pin.getAttribute('aria-label') === `Seleccionar ${venues.find((venue) => venue.id === id)?.name}`)));
     list.querySelectorAll('[data-venue-id]').forEach((item) => item.classList.toggle('active', item.dataset.venueId === id));
@@ -171,5 +187,5 @@ export function mapView(venues, selectedId = 'venue-alicia') {
   });
 
   mountCartography(map, canvas, venues, select, status);
-  return { map, list };
+  return { map, list, select };
 }
