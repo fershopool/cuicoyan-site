@@ -183,7 +183,7 @@ export function renderMapPage(venues) {
     selectedLink.href = routes.foro(venue.slug);
   }
   const { shell, rows, initial } = mapBlock(venues, 'venue-alicia', paintSelected);
-  const head = el('header', { className: 'map-head' }, [el('div', { className: 'map-head-copy' }, [el('span', { className: 'eyebrow deco', text: 'Explora la ciudad' }), el('h1', { text: 'Mapa cultural' }), el('p', { text: 'Un vistazo a los foros y espacios culturales de CDMX.' })]), el('img', { className: 'map-head-art', src: asset('palacio-mapa'), alt: '', decoding: 'async' })]);
+  const head = el('header', { className: 'map-head' }, [el('div', { className: 'map-head-copy' }, [el('span', { className: 'eyebrow deco', text: 'Explora la ciudad' }), el('h1', { text: 'Mapa cultural' }), el('p', { text: 'Un vistazo a los foros y espacios culturales de CDMX.' })]), ...['light', 'dark'].map((mode) => el('img', { className: `map-head-art mode-${mode}`, src: withBase(`/src/assets/mockup/palacio-mapa-${mode}.svg`), alt: '', decoding: 'async' }))]);
   const selected = el('section', { className: 'place-selected', attrs: { 'aria-live': 'polite' } }, [el('span', { className: 'eyebrow', text: 'Lugar seleccionado' }), selectedTitle, selectedCopy, selectedLink]);
   const places = el('section', { className: 'place-list' }, [el('div', { className: 'block-title' }, [el('h2', { text: `${numberWords[venues.length] || venues.length} espacios para comenzar` }), el('span', { className: 'see-all' }, ['CDMX', icon('chevron', { size: 16 })])]), el('div', { className: 'place-rows' }, rows)]);
   paintSelected(initial);

@@ -192,7 +192,6 @@
 @media (max-width: 900px) {
   :root { --header-height: 56px; }
   body { padding-bottom: calc(112px + env(safe-area-inset-bottom)); font-size: 15px; }
-  body::before, body::after { display: none; }
 
   /* Barra superior */
   .site-header { position: sticky; background: color-mix(in srgb, var(--marfil) 84%, transparent); backdrop-filter: blur(14px); box-shadow: none; }
@@ -257,7 +256,8 @@
   main[data-scene="todos"] .scene-todos.mode-dark, main[data-scene="huapango"] .scene-huapango.mode-dark, main[data-scene="teatro"] .scene-teatro.mode-dark { display: var(--show-dark); }
   main[data-scene="huapango"] .home-scene { width: 58%; height: 330px; }
   main[data-scene="teatro"] .home-scene { width: 64%; height: 330px; }
-  main[data-scene="todos"] .home-scene { top: 40px; width: 50%; height: 275px; }
+  main[data-scene="todos"] .home-scene { top: -24px; width: 68%; height: 370px; }
+  main[data-scene="todos"] .scene-img { -webkit-mask-image: linear-gradient(270deg, #000 60%, transparent 100%), linear-gradient(180deg, transparent 0, #000 12%, #000 90%, transparent 100%); mask-image: linear-gradient(270deg, #000 60%, transparent 100%), linear-gradient(180deg, transparent 0, #000 12%, #000 90%, transparent 100%); }
 
   .home-brand { position: relative; z-index: 2; display: flex; align-items: center; gap: .85rem; width: min(100% - 2.5rem, 1280px); margin: 0 auto; }
   .home-emblem { width: 68px; height: 68px; filter: drop-shadow(0 10px 16px rgb(190 20 100 / 30%)); }
@@ -423,7 +423,6 @@
 .map-head h1 { font: 800 clamp(2.1rem, 7.5vw, 3rem)/1.05 var(--font-app); letter-spacing: -.035em; }
 .map-head p { color: var(--muted); font-size: .98rem; }
 .map-head-art { position: absolute; top: -.6rem; right: -1.25rem; width: min(52%, 300px); pointer-events: none; -webkit-mask-image: linear-gradient(270deg, #000 55%, transparent 100%); mask-image: linear-gradient(270deg, #000 55%, transparent 100%); }
-[data-theme="dark"] .map-head-art { opacity: .55; filter: brightness(.75) saturate(1.3); }
 .map-grid { display: grid; gap: 1.1rem; }
 .map-shell { position: relative; height: 330px; overflow: hidden; border: 2px solid transparent; border-radius: 28px; background: linear-gradient(var(--surface), var(--surface)) padding-box, linear-gradient(135deg, #FF9D2E, #F21F6D 45%, #24C8EF) border-box; box-shadow: var(--card-shadow); }
 .map-shell .map-card { height: 100%; min-height: 0; border: 0; border-radius: 0; }
@@ -644,5 +643,6 @@ body::before, body::after {
   background-image: var(--sky), var(--strip), var(--strip-bg); background-repeat: no-repeat, repeat-y, no-repeat;
   background-position: left bottom, left top, left top; background-size: 100% auto, 100% auto, 100% 100%;
 }
+@media (max-width: 900px) { body::before, body::after { width: 22px; background-image: var(--strip), var(--strip-bg); background-repeat: repeat-y, no-repeat; background-position: left top; background-size: 100% auto, 100% 100%; } }
 .bg-flora { position: fixed; z-index: 0; right: -18px; top: calc(var(--header-height) + 4px); display: none; width: 320px; height: min(546px, 92vh); pointer-events: none; background: var(--flora) no-repeat right bottom / contain; }
 @media (min-width: 1280px) { .bg-flora { display: block; } }
